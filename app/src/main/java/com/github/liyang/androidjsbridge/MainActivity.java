@@ -36,7 +36,8 @@ import com.google.gson.Gson;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "js_bridge";
+    public static final String TAG = "js_bridge";
+
     private WebView mWebView;
     private AlertDialog mAlertDialog;
     private String mUrl;
@@ -52,8 +53,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setTitle("MainActivity");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WebView.getCurrentWebViewPackage();
             Log.w(TAG, "WebView Package --> " + WebView.getCurrentWebViewPackage());
         }
 
@@ -61,6 +64,11 @@ public class MainActivity extends AppCompatActivity {
         mTvError = findViewById(R.id.tv_main_error);
 
         mWebView = findViewById(R.id.wv_main);
+
+        mWebView.removeJavascriptInterface("searchBoxJavaBridge_");
+        mWebView.removeJavascriptInterface("accessibility");
+        mWebView.removeJavascriptInterface("accessibilityTraversal");
+
         mWebView.getSettings().setJavaScriptEnabled(true);
         if (Build.VERSION.SDK_INT >= 19) {
             mWebView.getSettings().setLoadsImagesAutomatically(true);
@@ -70,28 +78,30 @@ public class MainActivity extends AppCompatActivity {
 
         mWebView.setWebChromeClient(new WebChromeClient() {
 
-            //  android 3.0以下：用的这个方法
+            //android 3.0以下：用的这个方法
+            @SuppressWarnings("unused")
             public void openFileChooser(ValueCallback<Uri> valueCallback) {
                 uploadMessage = valueCallback;
                 openImageChooserActivity();
             }
 
-            // android 3.0以上，android4.0以下：用的这个方法
+            //android 3.0以上，android4.0以下：用的这个方法
+            @SuppressWarnings("unused")
             public void openFileChooser(ValueCallback<Uri> valueCallback, String acceptType) {
                 uploadMessage = valueCallback;
                 openImageChooserActivity();
             }
 
             //android 4.0 - android 4.3  安卓4.4.4也用的这个方法
-            public void openFileChooser(ValueCallback<Uri> valueCallback, String acceptType,
-                                        String capture) {
+            @SuppressWarnings("unused")
+            public void openFileChooser(ValueCallback<Uri> valueCallback, String acceptType, String capture) {
                 uploadMessage = valueCallback;
                 openImageChooserActivity();
             }
 
             //android4.4 无方法。。。
 
-            // Android 5.0及以上用的这个方法
+            //android 5.0及以上用的这个方法
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]>
                     filePathCallback, WebChromeClient.FileChooserParams fileChooserParams) {
@@ -132,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "onJsPrompt() called with:  url = [" + url + "], message = [" + message + "], defaultValue = [" + defaultValue + "]");
                 if (TextUtils.equals(message, "js-bridge")) {
                     Log.w(TAG, "onJsPrompt: defaultValue = " + defaultValue);
-                    result.confirm("你好啊，小伙子JS");
+                    result.confirm("你好啊JS");
                     return true;
                 } else {
                     return super.onJsPrompt(view, url, message, defaultValue, result);
@@ -275,8 +285,7 @@ public class MainActivity extends AppCompatActivity {
                     // Renderer was killed because the system ran out of memory.
                     // The app can recover gracefully by creating a new WebView instance
                     // in the foreground.
-                    Log.e("MY_APP_TAG", "System killed the WebView rendering process " +
-                            "to reclaim memory. Recreating...");
+                    Log.e("MY_APP_TAG", "System killed the WebView rendering process to reclaim memory. Recreating...");
 
                     if (mWebView != null) {
                         ViewGroup webViewContainer = findViewById(R.id.fl_main);
@@ -362,8 +371,9 @@ public class MainActivity extends AppCompatActivity {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void onActivityResultAboveL(int requestCode, int resultCode, Intent intent) {
-        if (requestCode != FILE_CHOOSER_RESULT_CODE || uploadMessageAboveL == null)
+        if (requestCode != FILE_CHOOSER_RESULT_CODE || uploadMessageAboveL == null) {
             return;
+        }
         Uri[] results = null;
         if (resultCode == RESULT_OK) {
             if (intent != null) {
@@ -376,8 +386,9 @@ public class MainActivity extends AppCompatActivity {
                         results[i] = item.getUri();
                     }
                 }
-                if (dataString != null)
+                if (dataString != null) {
                     results = new Uri[]{Uri.parse(dataString)};
+                }
             }
         }
         uploadMessageAboveL.onReceiveValue(results);

@@ -1,0 +1,45 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Android WebView漏洞检测</title>
+    <style type="text/css">
+    body {
+        margin: 10px;
+        padding: 10px;
+        font-size: 12px;
+        color: #333;
+        font-family: "微软雅黑", Tahoma, "宋体";
+    }
+    </style>
+    <script type="text/javascript">
+    function check() {
+
+        var res = 0;
+
+        for (var obj in window) {
+            try {
+                if ("getClass" in window[obj]) {
+                    try {
+                        window[obj].getClass();
+                        document.getElementById("res_show").innerHTML = "<b><font color='red'>当心！您当前使用的APP可能存在Andriod WebView 挂马漏洞！请不要用这个APP打开不可信的外部链接！</font></b>";
+                        res = 1;
+                        break;
+                    } catch (e) {}
+                }
+            } catch (e) {}
+        }
+
+        if (res == 0) {
+            document.getElementById("res_show").innerHTML = "<b><font color='green' size=6>恭喜！您当前的APP不存在Andriod WebView 挂马漏洞！请放心使用！</font></b>";
+        }
+    }
+    </script>
+</head>
+
+<body onload="check();">
+<div id="res_show">检测中，请等待...</div>
+<br/>
+</body>
+
+</html>

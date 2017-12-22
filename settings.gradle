@@ -1,1 +1,1 @@
-include ':app', ':a-js-bridge'
+include ':app', ':js-bridge'
